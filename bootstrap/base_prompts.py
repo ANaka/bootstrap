@@ -218,6 +218,7 @@ If there are any improvements you could make, describe them.
 Then, use your reflections to revise your tests and provide an improved python code block.
 
 Example:
+
 Original code snippet:
 ```python
 def add(a, b):
@@ -232,6 +233,7 @@ Proposed revisions:
 - Add type hints for function parameters and return type
 
 Revised code snippet:
+```python
 def add(a: int, b: int) -> int:
     return a + b
 ```
