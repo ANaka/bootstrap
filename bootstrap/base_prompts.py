@@ -48,20 +48,21 @@ CURRENT TASK
 As much as possible, try to make subtasks centered on an *ACTION*
 
 ### *UPDATE TASK LIST*
+Provide a markdown snippet containing your current task list. If you have completed a task, check it off in the list. Use the following format:
 
-Provide a markdown snippet containing your current task list and subtask list.
-
-If you have completed a task or subtask, check it off in the list.
-
-Use the following format:
 ```markdown
 TASKS
 - [x] T1 (completed)
 - [ ] T2 (current task)
 - [ ] T3
+```
 
-T2
-<Succinct description of T2>
+### *UPDATE SUBTASK LIST*
+Provide a markdown snippet containing the subtask list for the current task. If you have completed a subtask, check it off in the list. Use the following format:
+
+```markdown
+CURRENT TASK
+<Succinct description of the current task>
 - [ ] T2.1 - <succinct description of T2.1>
     - [x] *ASK CLARIFYING QUESTIONS*
     - [x] *REQUEST INFORMATION*
@@ -69,7 +70,7 @@ T2
     - [ ] *WRITE TESTS*
     - [ ] *REVISE TESTS*
     - [ ] *WRITE CODE*
-    - [ ] *REVISE CODE*
+    - [ ] *REVISE CODE*    
     - [ ] *REQUEST TEST EXECUTION*
 - [ ] T2.2 - <succinct description of T2.2>
     - [ ] *ARTICULATE TEST CASES*
@@ -83,7 +84,11 @@ T2
 
 ### *REVISE TASK LIST*
 
-If it makes sense, you can revise your task list. This could be to add a new task or subtask, or to remove a task or subtask.
+If it makes sense, you can revise your task list. This could be to add, change, or remove a task.
+
+### *REVISE SUBTASK LIST*
+
+If it makes sense, you can revise your subtask list. This could be to add, change, or remove a subtask.
 """
 
 actions_information_communication = """
