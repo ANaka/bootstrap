@@ -309,13 +309,9 @@ Whenever you take an action, you should prefix your response with the name of th
 The only things that should be in bold capitals are the names of actions in the *ACTIONS* list.
 
 ## *ACTIONS*
-
 {actions_task_management}
-
 {actions_information_communication}
-
 {actions_code_test_generation}
-
 {actions_prompt_management}
 
 ## General Guidelines
