@@ -206,11 +206,11 @@ def extract_functions_and_classes(path: str) -> List[Dict[str, Union[str, List[D
 
     return functions_and_classes
 
-def get_bootstrap_functions_and_classes() -> List[Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]]:
+def get_current_repo_functions_and_classes() -> List[Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]]:
     """
-    Extracts information about all the functions and classes in the bootstrap directory.
+    Extracts information about all the functions and classes in the current repo.
 
     Returns:
-        A list of dictionaries representing the functions and classes found in the bootstrap modules.
+        A list of dictionaries representing the functions and classes found in the repo modules.
     """
     return extract_functions_and_classes(repo_root)
