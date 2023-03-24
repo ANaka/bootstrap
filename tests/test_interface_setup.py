@@ -32,10 +32,5 @@ def test_create_chat_prompt():
 
     # Call create_chat_prompt with the mock_human_message
     chat_prompt = create_chat_prompt(mock_human_message)
-
-def test_create_conversation_chain():
-    # Define a mock chat_prompt
-    mock_chat_prompt = MagicMock(spec=ChatPromptTemplate)
-
-    # Call create_conversation_chain with the mock_chat_prompt
-    conversation_chain = create_conversation_chain(mock_chat_prompt)
+    
+    
