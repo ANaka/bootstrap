@@ -2,6 +2,8 @@ import os
 import ast
 from typing import List, Dict, Union
 from bootstrap import repo_root
+from langchain.agents import tool
+
 
 def get_full_definition(source: str, start_lineno: int, end_lineno: int) -> str:
     """
@@ -46,9 +48,11 @@ def extract_function_info(node: Union[ast.FunctionDef, ast.AsyncFunctionDef], so
         signature += f", {', '.join(defaults_str)}"
     signature += ')'
     
+    # get fully qualified name
+    qualname = f"{rel_path.replace(os.path.sep, '.').replace('.py', '')}.{node.name}"
+    
     # Extract function docstring and return annotation
     docstring = ast.get_docstring(node)
-    return_annotation = ast.get_type_annotation(node.returns) if node.returns else None
     
     # Extract function start and end line numbers
     start_lineno = node.lineno
@@ -59,11 +63,11 @@ def extract_function_info(node: Union[ast.FunctionDef, ast.AsyncFunctionDef], so
 
     return {
         "name": node.name,
+        "qualname": qualname,
         "type": "function",
         "path": rel_path,
         "signature": signature,
         "docstring": docstring,
-        "return_annotation": return_annotation,
         "start_lineno": start_lineno,
         "end_lineno": end_lineno,
         "full_definition": full_definition
@@ -84,7 +88,6 @@ def extract_method_info(node: Union[ast.FunctionDef, ast.AsyncFunctionDef], sour
     signature = f"{node.name}({', '.join([arg.arg for arg in node.args.args])})"
     # Extract method docstring and return annotation
     docstring = ast.get_docstring(node)
-    return_annotation = ast.get_type_annotation(node.returns) if node.returns else None
 
     # Extract method start and end line numbers
     start_lineno = node.lineno
@@ -98,11 +101,11 @@ def extract_method_info(node: Union[ast.FunctionDef, ast.AsyncFunctionDef], sour
         "name": node.name,
         "signature": signature,
         "docstring": docstring,
-        "return_annotation": return_annotation,
         "start_lineno": start_lineno,
         "end_lineno": end_lineno,
         "full_definition": full_definition
     }
+    
 def extract_class_info(node: ast.ClassDef, source: str, rel_path: str) -> Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]:
     """
     Extracts information about a given class node.Parameters:
@@ -141,8 +144,12 @@ def extract_class_info(node: ast.ClassDef, source: str, rel_path: str) -> Dict[s
     # Extract the full class definition
     full_definition = get_full_definition(source, start_lineno, end_lineno)
 
+    # get fully qualified name
+    qualname = f"{rel_path.replace(os.path.sep, '.').replace('.py', '')}.{node.name}"
+
     return {
         "name": node.name,
+        "qualname": qualname,
         "type": "class",
         "path": rel_path,
         "signature": signature,
@@ -206,7 +213,7 @@ def extract_functions_and_classes(path: str) -> List[Dict[str, Union[str, List[D
 
     return functions_and_classes
 
-def get_current_repo_functions_and_classes() -> List[Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]]:
+def get_current_repo_functions_and_classes(*args, **kwargs) -> List[Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]]:
     """
     Extracts information about all the functions and classes in the current repo.
 
@@ -214,3 +221,95 @@ def get_current_repo_functions_and_classes() -> List[Dict[str, Union[str, List[D
         A list of dictionaries representing the functions and classes found in the repo modules.
     """
     return extract_functions_and_classes(repo_root)
+
+@tool("get_current_repo_definitions_summary")
+def get_current_repo_definitions_summary(*args, **kwargs):
+    """
+    Extracts names of all the functions and classes in the current repo.
+    """
+    info = get_current_repo_functions_and_classes()
+    keep_keys = ['qualname', 'type', 'signature', 'docstring']
+    return [{k:v for k,v in item.items() if k in keep_keys} for item in info]
+    
+def _get_parent_module_source_code(function_qualname: str) -> Union[str, None]:
+    """
+    Given a function or class qualname, returns the source code of the module in which it resides.
+
+    Parameters:
+        function_qualname (str): The qualname of the function or class.
+
+    Returns:
+        The source code of the parent module if found, otherwise None.
+    """
+    functions_and_classes = get_current_repo_functions_and_classes()
+    for item in functions_and_classes:
+        if item['qualname'] == function_qualname:
+            rel_path = item.get('path', None)
+            if rel_path:
+                with open(os.path.join(repo_root, rel_path), 'r') as file:
+                    source = file.read()
+                return source
+    return None
+
+@tool("get_source_code")
+def get_source_code(function_qualname: str) -> Union[str, None]:
+    """
+    Given a function or class qualname, returns its source code.
+
+    Parameters:
+        function_qualname (str): The qualname of the function or class.
+
+    Returns:
+        The source code of the function or class if found, otherwise None.
+    """
+    functions_and_classes = get_current_repo_functions_and_classes()
+
+    for item in functions_and_classes:
+        if item['qualname'] == function_qualname:
+            return item.get('full_definition', None)
+    return None
+
+@tool("edit_source_code")
+def edit_source_code(function_qualname: str, new_code: str) -> bool:
+    """
+    Replaces the source code of a function or class with new code and saves the module.
+
+    Parameters:
+        function_qualname (str): The qualname of the function or class.
+        new_code (str): The new code to replace the original code.
+
+    Returns:
+        True if the source code was successfully updated, otherwise False.
+   """
+    functions_and_classes = get_current_repo_functions_and_classes()
+    parent_module_source = _get_parent_module_source_code(function_qualname)
+    if parent_module_source is None:
+        return False
+
+    function_info = None
+    for item in functions_and_classes:
+        if item['qualname'] == function_qualname:
+            function_info = item
+            break
+
+    if function_info is None:
+        return False
+
+    start_lineno = function_info.get('start_lineno', None)
+    end_lineno = function_info.get('end_lineno', None)
+    rel_path = function_info.get('path', None)
+
+    if start_lineno and end_lineno and rel_path:
+        source_lines = parent_module_source.split('\n')
+        updated_source_lines = source_lines[:start_lineno - 1] + new_code.split('\n') + source_lines[end_lineno:]
+        updated_source = '\n'.join(updated_source_lines)
+
+        try:
+            ast.parse(updated_source)
+            with open(os.path.join(repo_root, rel_path), 'w') as file:
+                file.write(updated_source)
+            return True
+        except SyntaxError:
+            return False
+
+    return False
