@@ -39,7 +39,7 @@ def get_github_docs(repo_owner, repo_name):
         )
         repo_path = pathlib.Path(d)
         doc_files = []
-        for extension in ['.md', '.mdx', '.ipynb', '.py']:
+        for extension in ['.md', '.mdx', '.ipynb', '.py', '.rst']:
             doc_files.extend(list(repo_path.glob(f"**/*{extension}")))
         for doc_file in doc_files:
             with open(doc_file, "r") as f:
