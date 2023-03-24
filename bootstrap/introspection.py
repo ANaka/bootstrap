@@ -3,6 +3,7 @@ import ast
 from typing import List, Dict, Union
 from bootstrap import repo_root
 from langchain.agents import tool
+import json
 
 
 def get_full_definition(source: str, start_lineno: int, end_lineno: int) -> str:
@@ -225,7 +226,7 @@ def get_current_repo_functions_and_classes(*args, **kwargs) -> List[Dict[str, Un
 @tool("get_current_repo_definitions_summary")
 def get_current_repo_definitions_summary(*args, **kwargs):
     """
-    Extracts names of all the functions and classes in the current repo.
+    Extracts names of all the functions and classes in the current repo. This tool takes no inputs.
     """
     info = get_current_repo_functions_and_classes()
     keep_keys = ['qualname', 'type', 'signature', 'docstring']
@@ -251,13 +252,14 @@ def _get_parent_module_source_code(function_qualname: str) -> Union[str, None]:
                 return source
     return None
 
-@tool("get_source_code")
-def get_source_code(function_qualname: str) -> Union[str, None]:
+
+    
+def _get_source_code(qualname: str) -> Union[str, None]:
     """
     Given a function or class qualname, returns its source code.
 
     Parameters:
-        function_qualname (str): The qualname of the function or class.
+        qualname (str): The qualname of the function or class.
 
     Returns:
         The source code of the function or class if found, otherwise None.
@@ -265,30 +267,43 @@ def get_source_code(function_qualname: str) -> Union[str, None]:
     functions_and_classes = get_current_repo_functions_and_classes()
 
     for item in functions_and_classes:
-        if item['qualname'] == function_qualname:
+        if item['qualname'] == qualname:
             return item.get('full_definition', None)
-    return None
+        
+    all_qualnames = [item['qualname'] for item in functions_and_classes]
+    return f"Could not find source code. Valid qualnames are: {all_qualnames}"
 
-@tool("edit_source_code")
-def edit_source_code(function_qualname: str, new_code: str) -> bool:
+@tool("get_source_code")
+def get_source_code(input:str):
+    """
+    Given a function or class qualname, returns its source code. The input to this tool should be formatted as follows:
+    {'qualname': '<qualname of the function or class>'}
+    """
+    try:
+        parsed_inputs = json.loads(input)
+    except json.JSONDecodeError:
+        parsed_inputs = {'qualname': input}
+    return _get_source_code(**parsed_inputs)
+
+def _edit_source_code(qualname: str, new_code: str) -> bool:
     """
     Replaces the source code of a function or class with new code and saves the module.
 
     Parameters:
-        function_qualname (str): The qualname of the function or class.
+        qualname (str): The qualname of the function or class.
         new_code (str): The new code to replace the original code.
 
     Returns:
         True if the source code was successfully updated, otherwise False.
    """
     functions_and_classes = get_current_repo_functions_and_classes()
-    parent_module_source = _get_parent_module_source_code(function_qualname)
+    parent_module_source = _get_parent_module_source_code(qualname)
     if parent_module_source is None:
         return False
 
     function_info = None
     for item in functions_and_classes:
-        if item['qualname'] == function_qualname:
+        if item['qualname'] == qualname:
             function_info = item
             break
 
@@ -313,3 +328,20 @@ def edit_source_code(function_qualname: str, new_code: str) -> bool:
             return False
 
     return False
+
+@tool("edit_source_code")
+def edit_source_code(inputs: str) -> bool:
+    """
+    Replaces the source code of a function or class with new code and saves the module.
+    
+    The inputs to this tool should be a dictionary formatted as follows:
+        {'qualname': '<qualname of the function or class>', 'new_code': '<new code>'}
+    """
+    try:
+        parsed_inputs = json.loads(inputs)
+    except json.JSONDecodeError:
+        return """
+Error parsing inputs. Please ensure that the inputs are formatted as follows:
+{'qualname': '<qualname of the function or class>', 'new_code': '<new code>'}
+"""
+    return _edit_source_code(**parsed_inputs)
