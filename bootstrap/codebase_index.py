@@ -5,6 +5,9 @@ from typing import Union
 from bootstrap import repo_root, vectorstores_root
 from bootstrap.introspection import extract_functions_and_classes
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def codebase_to_llama_index(root: Union[str, Path] = None,):
     """
@@ -34,6 +37,7 @@ def codebase_to_llama_index(root: Union[str, Path] = None,):
     tree_index = GPTTreeIndex(indices)
     return tree_index
 
+
 def save_codebase_llama_index(
     codebase_root: Union[str, Path] = None,
     savepath:Union[str, Path] = None,
@@ -54,3 +58,6 @@ def load_codebase_llama_index(savepath:Union[str, Path] = None,):
     if savepath is None:
         savepath = Path(vectorstores_root) / 'codebase_llama_index'
     return GPTTreeIndex.load_from_disk(savepath)
+
+if __name__ == "__main__":
+    save_codebase_llama_index()
