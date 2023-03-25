@@ -9,10 +9,10 @@ from langchain.prompts.chat import (
 from langchain.memory import ConversationBufferMemory
 from dotenv import load_dotenv
 from bootstrap.base_prompts import system_prompt
+from bootstrap.auth import set_environment_vars
 
 
-def load_environment_variables():
-    load_dotenv()
+set_environment_vars()
 
 
 def create_human_message_template():

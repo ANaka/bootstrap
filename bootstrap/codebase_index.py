@@ -4,10 +4,11 @@ from pathlib import Path
 from typing import Union
 from bootstrap import repo_root, vectorstores_root
 from bootstrap.introspection import extract_functions_and_classes
+from bootstrap.auth import set_environment_vars
 import json
-from dotenv import load_dotenv
 
-load_dotenv()
+set_environment_vars()
+
 
 def codebase_to_llama_index(root: Union[str, Path] = None,):
     """
