@@ -1,12 +1,9 @@
 
-from llama_index import GPTSimpleVectorIndex, GPTTreeIndex, Document, SimpleDirectoryReader
-from llama_index.composability import ComposableGraph
+from llama_index import GPTSimpleVectorIndex, SimpleDirectoryReader
 from pathlib import Path
 from typing import Union
 from bootstrap import repo_root, vectorstores_root
-from bootstrap.introspection import extract_functions_and_classes
 from bootstrap.auth import set_environment_vars
-import json
 
 set_environment_vars()
 
