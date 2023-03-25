@@ -1,5 +1,6 @@
 
-from llama_index import GPTSimpleVectorIndex, GPTTreeIndex, Document
+from llama_index import GPTSimpleVectorIndex, GPTTreeIndex, Document, SimpleDirectoryReader
+from llama_index.composability import ComposableGraph
 from pathlib import Path
 from typing import Union
 from bootstrap import repo_root, vectorstores_root
@@ -21,22 +22,13 @@ def codebase_to_llama_index(root: Union[str, Path] = None,):
     """
     if root is None:
         root = repo_root
-    all_defs = extract_functions_and_classes(root)
-    modules = list(set([d['path'] for d in all_defs]))
-    indices = []
-    for module in modules:
-        this_module_defs = [d for d in all_defs if d['path'] == module]
-        docs = [Document(json.dumps(d)) for d in this_module_defs]
-        index = GPTSimpleVectorIndex(docs)
-        summary = index.query(
-            "What is a summary of function of this python module?"
-        )
-        index.set_text(str(summary))
-        index.set_doc_id(module)
-        indices.append(index)
+    doc_files = []
+    for extension in ['.py', '.toml']:
+        doc_files.extend(list(repo_root.glob(f"**/*{extension}")))
 
-    tree_index = GPTTreeIndex(indices)
-    return tree_index
+    loader = SimpleDirectoryReader(input_files=doc_files)
+    documents = loader.load_data()
+    return GPTSimpleVectorIndex(documents)
 
 
 def save_codebase_llama_index(
@@ -58,7 +50,7 @@ def save_codebase_llama_index(
 def load_codebase_llama_index(savepath:Union[str, Path] = None,):
     if savepath is None:
         savepath = Path(vectorstores_root) / 'codebase_llama_index'
-    return GPTTreeIndex.load_from_disk(savepath)
+    return GPTSimpleVectorIndex.load_from_disk(savepath)
 
 if __name__ == "__main__":
     save_codebase_llama_index()
