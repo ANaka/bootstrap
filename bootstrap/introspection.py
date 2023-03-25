@@ -345,3 +345,4 @@ Error parsing inputs. Please ensure that the inputs are formatted as follows:
 {'qualname': '<qualname of the function or class>', 'new_code': '<new code>'}
 """
     return _edit_source_code(**parsed_inputs)
+
