@@ -160,3 +160,6 @@ cython_debug/
 #.idea/
 
 poetry.lock
+
+bootstrap/vectorstores
+!bootstrap/vectorstores/__init__.py
