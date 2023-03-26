@@ -1,8 +1,8 @@
+from functools import partial
 
 from langchain import LLMChain
 from langchain.llms.openai import OpenAI
 from langchain.prompts import PromptTemplate
-from functools import partial
 
 code_editor_prompt = PromptTemplate(
     input_variables=["input"],
