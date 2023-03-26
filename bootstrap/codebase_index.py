@@ -28,7 +28,7 @@ def codebase_to_llama_index(root: Union[str, Path] = None,):
     return GPTSimpleVectorIndex(documents)
 
 
-def save_codebase_llama_index(
+def save_codebase_index(
     codebase_root: Union[str, Path] = None,
     savepath:Union[str, Path] = None,
     ):
@@ -40,14 +40,13 @@ def save_codebase_llama_index(
     if savepath is None:
         savepath = Path(vectorstores_root) / 'codebase_llama_index'
     
-    
     index.save_to_disk(savepath)
     return savepath
 
-def load_codebase_llama_index(savepath:Union[str, Path] = None,):
+def load_codebase_index(savepath:Union[str, Path] = None,):
     if savepath is None:
         savepath = Path(vectorstores_root) / 'codebase_llama_index'
     return GPTSimpleVectorIndex.load_from_disk(savepath)
 
 if __name__ == "__main__":
-    save_codebase_llama_index()
+    save_codebase_index()

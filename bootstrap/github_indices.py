@@ -20,10 +20,6 @@ def create_llama_index(repo_owner, repo_name, savepath):
     set_environment_vars()
     sources = list(get_github_docs(repo_owner, repo_name))
     docs = [Document.from_langchain_format(doc) for doc in sources]
-    # splitter = CharacterTextSplitter(separator=" ", chunk_size=2048, chunk_overlap=0)
-    # for source in tqdm(sources, desc="Processing documents"):
-    #     for chunk in splitter.split_text(source.page_content):
-    #         docs.append(Document(chunk, extra_info_str=source.metadata))
     index = GPTSimpleVectorIndex(docs)
     if savepath is None:
         savepath = Path(vectorstores_root) / f'github:{repo_name}'
@@ -56,9 +52,15 @@ def get_github_docs(repo_owner, repo_name):
 
 def save_github_indices():
     for repo_owner, repo_name in REPO_CONFIGS:
-        
         savepath = Path(vectorstores_root) / f'github:{repo_name}'
         create_llama_index(repo_owner, repo_name, savepath.as_posix())
+        
+# dont love the magic paths
+def load_langchain_index():
+    return GPTSimpleVectorIndex.load_from_disk(Path(vectorstores_root) / f'github:hwchase17/langchain')
+
+def load_llama_index_index():
+    return GPTSimpleVectorIndex.load_from_disk(Path(vectorstores_root) / f'github:jerryjliu/llama_index')
 
 if __name__ == "__main__":
     save_github_indices()  # This will parse arguments and execute the command.
