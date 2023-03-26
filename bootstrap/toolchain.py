@@ -23,17 +23,17 @@ def get_tools():
         LlamaIndexTool.from_tool_config(
             IndexToolConfig(
             index=load_langchain_index(), 
-            name=f"Langchain docs query",
-            description=f"Useful for when you want to look up documentation for the langchain library.",
-            index_query_kwargs={"similarity_top_k": 3},
+            name=f"Langchain repo query",
+            description=f"Useful for when you want to look up documentation or source code for the langchain library.",
+            index_query_kwargs={"similarity_top_k": 8},
             tool_kwargs={"return_direct": False}
         )),
         LlamaIndexTool.from_tool_config(
             IndexToolConfig(
             index=load_llama_index_index(), 
-            name=f"llama_index docs query",
-            description=f"Useful for when you want to look up documentation for the llama_index library.",
-            index_query_kwargs={"similarity_top_k": 3},
+            name=f"llama_index repo query",
+            description=f"Useful for when you want to look up documentation or source code  for the llama_index library.",
+            index_query_kwargs={"similarity_top_k": 8},
             tool_kwargs={"return_direct": False}
         )),
         Tool(
