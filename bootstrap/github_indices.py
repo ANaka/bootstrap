@@ -57,10 +57,10 @@ def save_github_indices():
         
 # dont love the magic paths
 def load_langchain_index():
-    return GPTSimpleVectorIndex.load_from_disk(Path(vectorstores_root) / f'github:hwchase17/langchain')
+    return GPTSimpleVectorIndex.load_from_disk(Path(vectorstores_root) / f'github:langchain')
 
 def load_llama_index_index():
-    return GPTSimpleVectorIndex.load_from_disk(Path(vectorstores_root) / f'github:jerryjliu/llama_index')
+    return GPTSimpleVectorIndex.load_from_disk(Path(vectorstores_root) / f'github:llama_index')
 
 if __name__ == "__main__":
     save_github_indices()  # This will parse arguments and execute the command.
