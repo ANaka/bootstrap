@@ -29,6 +29,7 @@ def create_llama_index(repo_owner, repo_name, savepath):
     
 
 def get_github_docs(repo_owner, repo_name):
+    #might be less good than https://llamahub.ai/l/github_repo but is more flexible
     with tempfile.TemporaryDirectory() as d:
         subprocess.check_call(
             f"git clone --depth 1 https://github.com/{repo_owner}/{repo_name}.git .",
@@ -42,7 +43,7 @@ def get_github_docs(repo_owner, repo_name):
         )
         repo_path = pathlib.Path(d)
         doc_files = []
-        for extension in ['.md', '.mdx', '.ipynb', '.rst']:
+        for extension in ['.md', '.mdx', '.ipynb', '.py', '.rst']:
             doc_files.extend(list(repo_path.glob(f"**/*{extension}")))
         for doc_file in doc_files:
             with open(doc_file, "r") as f:
