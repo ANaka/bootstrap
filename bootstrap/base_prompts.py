@@ -1,11 +1,4 @@
-from langchain.chat_models import ChatOpenAI
-from langchain import ConversationChain
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-    MessagesPlaceholder, 
-)
+from langchain.prompts.chat import SystemMessagePromptTemplate
 
 actions_task_management = """
 ## TASK MANAGEMENT ACTIONS
@@ -70,7 +63,7 @@ CURRENT TASK
     - [ ] *WRITE TESTS*
     - [ ] *REVISE TESTS*
     - [ ] *WRITE CODE*
-    - [ ] *REVISE CODE*    
+    - [ ] *REVISE CODE*
     - [ ] *REQUEST TEST EXECUTION*
 - [ ] T2.2 - <succinct description of T2.2>
     - [ ] *ARTICULATE TEST CASES*
@@ -96,7 +89,7 @@ actions_information_communication = """
 
 ### *ASK CLARIFYING QUESTIONS*
 
-Ask me questions to better understand your task. 
+Ask me questions to better understand your task.
 
 If prudent, wait for my answer before continuing.
 
@@ -110,8 +103,8 @@ It could also be external information such as API documentation.
 
 Provide me search terms and I will run a google search and convey the results to you.
 
-Example: 
-   
+Example:
+
 ```
 *REQUEST A GOOGLE SEARCH*
 Search terms: "python unittest best practices"
@@ -123,7 +116,7 @@ Provide me a command to run tests and I will run them and convey the results to 
 
 An example command is `poetry run pytest tests/mytest.py::test_mysubtest`
 
-Example: 
+Example:
 
 ```
 *REQUEST TEST EXECUTION*
@@ -134,8 +127,8 @@ Command: "poetry run pytest tests/test_utils.py::test_calculate_sum"
 
 Request that I review your code and provide feedback.
 
-Example: 
-   
+Example:
+
 ```
 *REQUEST CODE REVIEW*
 Please review the following code snippet and provide feedback:
@@ -219,7 +212,7 @@ Commit message: "Add multiply function and its test cases"
 Describe some examples of functionality that could be turned into tests.
 
 Example:
-   
+
 ```
 We will test the add function with the following test cases:
 - Input: (1, 1); Expected output: 2
@@ -301,9 +294,9 @@ system_prompt = SystemMessagePromptTemplate.from_template(
     template=f"""
 This is your system prompt, instructions that guide your reasoning and output. This system prompt is a living document and you are allowed to suggest changes to it.
 
-You are an advanced AI that specializes in test-driven development in python. We are going to collaborate on coding tasks through dialogue. 
+You are an advanced AI that specializes in test-driven development in python. We are going to collaborate on coding tasks through dialogue.
 
-You have a set of actions that you are allowed to take. 
+You have a set of actions that you are allowed to take.
 
 Whenever you take an action, you should prefix your response with the name of that action and then execute it.
 The only things that should be in bold capitals are the names of actions in the *ACTIONS* list.

@@ -1,9 +1,11 @@
-import os
 import ast
-from typing import List, Dict, Union
-from bootstrap import repo_root
-from langchain.agents import tool
 import json
+import os
+from typing import Dict, List, Union
+
+from langchain.agents import tool
+
+from bootstrap import repo_root
 
 
 def get_full_definition(source: str, start_lineno: int, end_lineno: int) -> str:
@@ -18,11 +20,14 @@ def get_full_definition(source: str, start_lineno: int, end_lineno: int) -> str:
     Returns:
         The full definition of the code block as a string.
     """
-    source_lines = source.split('\n')
-    full_definition_lines = source_lines[start_lineno-1:end_lineno]
-    return '\n'.join(full_definition_lines).strip()
+    source_lines = source.split("\n")
+    full_definition_lines = source_lines[start_lineno - 1 : end_lineno]
+    return "\n".join(full_definition_lines).strip()
 
-def extract_function_info(node: Union[ast.FunctionDef, ast.AsyncFunctionDef], source: str, rel_path: str) -> Dict[str, Union[str, List[Dict[str, Union[str, int]]], None]]:
+
+def extract_function_info(
+    node: Union[ast.FunctionDef, ast.AsyncFunctionDef], source: str, rel_path: str
+) -> Dict[str, Union[str, List[Dict[str, Union[str, int]]], None]]:
     """
     Extracts information about a given function or async function node.
 
@@ -47,14 +52,14 @@ def extract_function_info(node: Union[ast.FunctionDef, ast.AsyncFunctionDef], so
     if defaults:
         defaults_str = [repr(default) for default in defaults]
         signature += f", {', '.join(defaults_str)}"
-    signature += ')'
-    
+    signature += ")"
+
     # get fully qualified name
     qualname = f"{rel_path.replace(os.path.sep, '.').replace('.py', '')}.{node.name}"
-    
+
     # Extract function docstring and return annotation
     docstring = ast.get_docstring(node)
-    
+
     # Extract function start and end line numbers
     start_lineno = node.lineno
     end_lineno = node.end_lineno
@@ -71,10 +76,13 @@ def extract_function_info(node: Union[ast.FunctionDef, ast.AsyncFunctionDef], so
         "docstring": docstring,
         "start_lineno": start_lineno,
         "end_lineno": end_lineno,
-        "full_definition": full_definition
+        "full_definition": full_definition,
     }
 
-def extract_method_info(node: Union[ast.FunctionDef, ast.AsyncFunctionDef], source: str) -> Dict[str, Union[str, int, None]]:
+
+def extract_method_info(
+    node: Union[ast.FunctionDef, ast.AsyncFunctionDef], source: str
+) -> Dict[str, Union[str, int, None]]:
     """
     Extracts information about a given method node.
 
@@ -104,10 +112,13 @@ def extract_method_info(node: Union[ast.FunctionDef, ast.AsyncFunctionDef], sour
         "docstring": docstring,
         "start_lineno": start_lineno,
         "end_lineno": end_lineno,
-        "full_definition": full_definition
+        "full_definition": full_definition,
     }
-    
-def extract_class_info(node: ast.ClassDef, source: str, rel_path: str) -> Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]:
+
+
+def extract_class_info(
+    node: ast.ClassDef, source: str, rel_path: str
+) -> Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]:
     """
     Extracts information about a given class node.Parameters:
         node (ast.ClassDef): The class node to extract information from.
@@ -124,17 +135,9 @@ def extract_class_info(node: ast.ClassDef, source: str, rel_path: str) -> Dict[s
         if isinstance(class_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             class_body.append(extract_method_info(class_node, source))
         elif isinstance(class_node, ast.Assign):
-            class_body.append({
-                "type": "assignment",
-                "name": class_node.targets[0].id,
-                "lineno": class_node.lineno
-            })
+            class_body.append({"type": "assignment", "name": class_node.targets[0].id, "lineno": class_node.lineno})
         elif isinstance(class_node, ast.Expr):
-            class_body.append({
-                "type": "expression",
-                "value": ast.dump(class_node.value),
-                "lineno": class_node.lineno
-            })
+            class_body.append({"type": "expression", "value": ast.dump(class_node.value), "lineno": class_node.lineno})
 
     # Extract class docstring, signature, and start and end line numbers
     docstring = ast.get_docstring(node)
@@ -158,10 +161,13 @@ def extract_class_info(node: ast.ClassDef, source: str, rel_path: str) -> Dict[s
         "body": class_body,
         "start_lineno": start_lineno,
         "end_lineno": end_lineno,
-        "full_definition": full_definition
+        "full_definition": full_definition,
     }
 
-def process_nodes(module_ast: ast.Module, source: str, rel_path: str) -> List[Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]]:
+
+def process_nodes(
+    module_ast: ast.Module, source: str, rel_path: str
+) -> List[Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]]:
     """
     Processes all nodes in a given module AST.Parameters:
         module_ast (ast.Module): The module AST to process.
@@ -179,7 +185,7 @@ def process_nodes(module_ast: ast.Module, source: str, rel_path: str) -> List[Di
             result.append(extract_function_info(node, source, rel_path))
         elif isinstance(node, ast.ClassDef):
             result.append(extract_class_info(node, source, rel_path))
-            
+
     return result
 
 
@@ -196,10 +202,10 @@ def extract_functions_and_classes(path: str) -> List[Dict[str, Union[str, List[D
     # Recursively search for Python modules in the given directory
     for root, dirs, files in os.walk(path):
         for filename in files:
-            if filename.endswith('.py'):
+            if filename.endswith(".py"):
                 file_path = os.path.join(root, filename)
 
-                with open(file_path, 'r') as file:
+                with open(file_path, "r") as file:
                     source = file.read()
 
                 try:
@@ -214,7 +220,10 @@ def extract_functions_and_classes(path: str) -> List[Dict[str, Union[str, List[D
 
     return functions_and_classes
 
-def get_current_repo_functions_and_classes(*args, **kwargs) -> List[Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]]:
+
+def get_current_repo_functions_and_classes(
+    *args, **kwargs
+) -> List[Dict[str, Union[str, List[Dict[str, Union[str, int, None]]]]]]:
     """
     Extracts information about all the functions and classes in the current repo.
 
@@ -223,15 +232,17 @@ def get_current_repo_functions_and_classes(*args, **kwargs) -> List[Dict[str, Un
     """
     return extract_functions_and_classes(repo_root)
 
+
 @tool("get_current_repo_definitions_summary")
 def get_current_repo_definitions_summary(*args, **kwargs):
     """
     Extracts names of all the functions and classes in the current repo. This tool takes no inputs.
     """
     info = get_current_repo_functions_and_classes()
-    keep_keys = ['qualname', 'type', 'signature', 'docstring']
-    return [{k:v for k,v in item.items() if k in keep_keys} for item in info]
-    
+    keep_keys = ["qualname", "type", "signature", "docstring"]
+    return [{k: v for k, v in item.items() if k in keep_keys} for item in info]
+
+
 def _get_parent_module_source_code(function_qualname: str) -> Union[str, None]:
     """
     Given a function or class qualname, returns the source code of the module in which it resides.
@@ -244,16 +255,15 @@ def _get_parent_module_source_code(function_qualname: str) -> Union[str, None]:
     """
     functions_and_classes = get_current_repo_functions_and_classes()
     for item in functions_and_classes:
-        if item['qualname'] == function_qualname:
-            rel_path = item.get('path', None)
+        if item["qualname"] == function_qualname:
+            rel_path = item.get("path", None)
             if rel_path:
-                with open(os.path.join(repo_root, rel_path), 'r') as file:
+                with open(os.path.join(repo_root, rel_path), "r") as file:
                     source = file.read()
                 return source
     return None
 
 
-    
 def _get_source_code(qualname: str) -> Union[str, None]:
     """
     Given a function or class qualname, returns its source code.
@@ -267,14 +277,15 @@ def _get_source_code(qualname: str) -> Union[str, None]:
     functions_and_classes = get_current_repo_functions_and_classes()
 
     for item in functions_and_classes:
-        if item['qualname'] == qualname:
-            return item.get('full_definition', None)
-        
-    all_qualnames = [item['qualname'] for item in functions_and_classes]
+        if item["qualname"] == qualname:
+            return item.get("full_definition", None)
+
+    all_qualnames = [item["qualname"] for item in functions_and_classes]
     return f"Could not find source code. Valid qualnames are: {all_qualnames}"
 
+
 @tool("get_source_code")
-def get_source_code(input:str):
+def get_source_code(input: str):
     """
     Given a function or class qualname, returns its source code. The input to this tool should be formatted as follows:
     {'qualname': '<qualname of the function or class>'}
@@ -282,8 +293,9 @@ def get_source_code(input:str):
     try:
         parsed_inputs = json.loads(input)
     except json.JSONDecodeError:
-        parsed_inputs = {'qualname': input}
+        parsed_inputs = {"qualname": input}
     return _get_source_code(**parsed_inputs)
+
 
 def _edit_source_code(qualname: str, new_code: str) -> bool:
     """
@@ -295,7 +307,7 @@ def _edit_source_code(qualname: str, new_code: str) -> bool:
 
     Returns:
         True if the source code was successfully updated, otherwise False.
-   """
+    """
     functions_and_classes = get_current_repo_functions_and_classes()
     parent_module_source = _get_parent_module_source_code(qualname)
     if parent_module_source is None:
@@ -303,25 +315,25 @@ def _edit_source_code(qualname: str, new_code: str) -> bool:
 
     function_info = None
     for item in functions_and_classes:
-        if item['qualname'] == qualname:
+        if item["qualname"] == qualname:
             function_info = item
             break
 
     if function_info is None:
         return False
 
-    start_lineno = function_info.get('start_lineno', None)
-    end_lineno = function_info.get('end_lineno', None)
-    rel_path = function_info.get('path', None)
+    start_lineno = function_info.get("start_lineno", None)
+    end_lineno = function_info.get("end_lineno", None)
+    rel_path = function_info.get("path", None)
 
     if start_lineno and end_lineno and rel_path:
-        source_lines = parent_module_source.split('\n')
-        updated_source_lines = source_lines[:start_lineno - 1] + new_code.split('\n') + source_lines[end_lineno:]
-        updated_source = '\n'.join(updated_source_lines)
+        source_lines = parent_module_source.split("\n")
+        updated_source_lines = source_lines[: start_lineno - 1] + new_code.split("\n") + source_lines[end_lineno:]
+        updated_source = "\n".join(updated_source_lines)
 
         try:
             ast.parse(updated_source)
-            with open(os.path.join(repo_root, rel_path), 'w') as file:
+            with open(os.path.join(repo_root, rel_path), "w") as file:
                 file.write(updated_source)
             return True
         except SyntaxError:
@@ -329,11 +341,12 @@ def _edit_source_code(qualname: str, new_code: str) -> bool:
 
     return False
 
+
 @tool("edit_source_code")
 def edit_source_code(inputs: str) -> bool:
     """
     Replaces the source code of a function or class with new code and saves the module.
-    
+
     The inputs to this tool should be a dictionary formatted as follows:
         {'qualname': '<qualname of the function or class>', 'new_code': '<new code>'}
     """
@@ -345,4 +358,3 @@ Error parsing inputs. Please ensure that the inputs are formatted as follows:
 {'qualname': '<qualname of the function or class>', 'new_code': '<new code>'}
 """
     return _edit_source_code(**parsed_inputs)
-
