@@ -7,7 +7,6 @@ from langchain.prompts.chat import (
     MessagesPlaceholder, 
 )
 from langchain.memory import ConversationBufferMemory
-from dotenv import load_dotenv
 from bootstrap.base_prompts import system_prompt
 from bootstrap.auth import set_environment_vars
 
