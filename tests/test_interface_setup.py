@@ -3,7 +3,8 @@ from unittest.mock import MagicMock
 
 from langchain.prompts.chat import HumanMessagePromptTemplate
 
-from bootstrap.interface_setup import create_chat_prompt, load_environment_variables
+from bootstrap.auth import set_environment_vars
+from bootstrap.interface_setup import create_chat_prompt
 
 
 def test_load_environment_variables():
@@ -12,7 +13,7 @@ def test_load_environment_variables():
         del os.environ["OPENAI_API_KEY"]
 
     # Call the load_environment_variables() function
-    load_environment_variables()
+    set_environment_vars()
 
     # Assert that the 'OPENAI_API_KEY' is present in the environment variables
     assert "OPENAI_API_KEY" in os.environ
