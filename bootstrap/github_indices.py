@@ -19,7 +19,7 @@ def create_llama_index(repo_owner, repo_name, savepath):
     set_environment_vars()
     sources = list(get_github_docs(repo_owner, repo_name))
     docs = [Document.from_langchain_format(doc) for doc in sources]
-    index = GPTSimpleVectorIndex(docs)
+    index = GPTSimpleVectorIndex(docs)  #  not sure if this is the right index type, just a Simple way to start
     if savepath is None:
         savepath = Path(vectorstores_root) / f"github:{repo_name}"
     print(savepath)
@@ -38,7 +38,13 @@ def get_github_docs(repo_owner, repo_name):
         git_sha = subprocess.check_output("git rev-parse HEAD", shell=True, cwd=d).decode("utf-8").strip()
         repo_path = pathlib.Path(d)
         doc_files = []
-        for extension in [".md", ".mdx", ".ipynb", ".py", ".rst"]:
+        for extension in [
+            ".md",
+            ".mdx",
+            ".ipynb",
+            ".py",
+            ".rst",
+        ]:  # might make sense to split this into separate indices for source code vs docs?
             doc_files.extend(list(repo_path.glob(f"**/*{extension}")))
         for doc_file in doc_files:
             with open(doc_file, "r") as f:
